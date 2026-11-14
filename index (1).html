@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocket Quest — Space Mission Game</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#f4f7ff;background:#070d20}
+header{text-align:center;padding:28px 16px 20px;background:linear-gradient(130deg,#101d42,#152b55)}
+header h1{font-size:clamp(27px,5vw,43px);margin:5px 0;color:#fff}
+header p{color:#c6d5f4;margin:0}
+.tag{color:#65e4f2;font-weight:bold;letter-spacing:2px;font-size:12px}
+main{max-width:980px;margin:20px auto;padding:0 14px 50px}
+.panel{background:#111d36;border:1px solid #2b4169;border-radius:15px;padding:17px;margin:13px 0}
+h2{font-size:19px;margin:0 0 12px}
+label{display:block;color:#c6d5f4;font-size:14px;margin:12px 0 5px}
+select,input{width:100%;padding:11px;border-radius:9px;border:1px solid #405982;background:#09142a;color:white;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+button{background:#5ce0ee;color:#061426;border:0;border-radius:10px;padding:12px 18px;font-weight:bold;font-size:15px;cursor:pointer;margin:6px 5px 0 0}
+button.secondary{background:#293e63;color:#fff}
+.instrument{display:flex;gap:9px;align-items:flex-start;padding:10px;margin:7px 0;background:#0a162d;border:1px solid #293e63;border-radius:9px}
+.instrument input{width:auto;margin-top:4px}
+.instrument span{font-size:13px;color:#d9e5fb}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.meterbox{background:#09152b;padding:11px;border-radius:10px;border:1px solid #293e63}
+.meterbox b{display:block;font-size:21px;color:#68e2ee}
+.meterbox small{color:#b5c7e6}
+#feedback{padding:12px;border-radius:9px;background:#0a162d;color:#dceaff;margin-top:12px;line-height:1.5}
+#launchArea{display:none;position:relative;height:320px;overflow:hidden;border-radius:14px;border:1px solid #314b78;background:radial-gradient(circle at 70% 20%,#243c78 0,#101b3b 28%,#050a19 75%)}
+.star{position:absolute;width:3px;height:3px;background:white;border-radius:50%;animation:twinkle 2s infinite alternate}
+@keyframes twinkle{from{opacity:.25}to{opacity:1}}
+.planet{position:absolute;width:95px;height:95px;border-radius:50%;right:12%;top:45px;background:radial-gradient(circle at 30% 30%,#7be3ed,#2875bd 60%,#122b67);box-shadow:0 0 30px #4ebde966}
+.rocket{position:absolute;left:45%;bottom:22px;font-size:65px;transform:rotate(-45deg);filter:drop-shadow(0 0 10px #ffcf70);z-index:2}
+.flame{position:absolute;left:calc(45% + 3px);bottom:0px;font-size:36px;transform:rotate(135deg);z-index:1}
+.rocket.fly{animation:launch 5s ease-in forwards}
+.flame.burn{animation:flame 0.15s infinite alternate}
+@keyframes launch{0%{left:45%;bottom:22px;transform:rotate(-45deg) scale(1)}40%{left:53%;bottom:135px;transform:rotate(-45deg) scale(.9)}100%{left:75%;bottom:280px;transform:rotate(-45deg) scale(.45);opacity:.15}}
+@keyframes flame{from{opacity:.6;transform:rotate(135deg) scale(.8)}to{opacity:1;transform:rotate(135deg) scale(1.2)}}
+#countdown{position:absolute;left:15px;top:15px;font-size:14px;color:#d7e8ff;font-weight:bold}
+#launchMessage{text-align:center;padding:12px;color:#c9e7ff;font-weight:bold}
+.hidden{display:none}
+footer{text-align:center;color:#8297bb;font-size:12px;padding:22px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.meters{grid-template-columns:1fr 1fr 1fr}#launchArea{height:280px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="tag">A BEGINNER-FRIENDLY SPACE MISSION GAME</div>
+ <h1>🚀 ROCKET QUEST</h1>
+ <p>Build a simple spacecraft, launch it and complete your mission!</p>
+</header>
+<main>
+ <section class="panel">
+  <h2>1. Choose your mission</h2>
+  <div class="grid">
+   <div><label for="mission">Where are you going?</label>
+    <select id="mission">
+     <option value="moon">🌕 Moon — take pictures of the surface</option>
+     <option value="earth">🌍 Earth — observe clouds and oceans</option>
+     <option value="mars">🔴 Mars — study the red planet</option>
+    </select></div>
+   <div><label for="level">Difficulty</label>
+    <select id="level"><option value="easy">Beginner</option><option value="normal" selected>Intermediate</option></select></div>
+  </div>
+ </section>
+ <section class="panel">
+  <h2>2. Build your rocket</h2>
+  <div class="grid">
+   <div><label for="rocket">Choose a rocket</label>
+    <select id="rocket">
+     <option value="small">Explorer Rocket — low cost, small payload</option>
+     <option value="medium" selected>Discovery Rocket — balanced choice</option>
+     <option value="heavy">Titan Rocket — powerful, expensive</option>
+    </select></div>
+   <div><label for="power">Choose a power system</label>
+    <select id="power"><option value="basic">Basic solar panels</option><option value="strong" selected>Large solar panels</option></select></div>
+  </div>
+  <label>3. Choose your science equipment</label>
+  <label class="instrument"><input type="checkbox" class="tool" value="camera" checked><span><b>📷 Camera</b><br>Take pictures. Adds science points.</span></label>
+  <label class="instrument"><input type="checkbox" class="tool" value="scanner"><span><b>🔎 Surface scanner</b><br>Study the surface of a planet or moon.</span></label>
+  <label class="instrument"><input type="checkbox" class="tool" value="weather"><span><b>🌡️ Weather sensor</b><br>Measure temperature and weather conditions.</span></label>
+ </section>
+ <section class="panel">
+  <h2>4. Check your mission resources</h2>
+  <div class="meters">
+   <div class="meterbox"><small>Rocket capacity</small><b id="mass">—</b><small>kg payload used</small></div>
+   <div class="meterbox"><small>Power needed</small><b id="watts">—</b><small>power units</small></div>
+   <div class="meterbox"><small>Mission cost</small><b id="cost">—</b><small>credits</small></div>
+  </div>
+  <div id="feedback">Choose your equipment to see if your rocket is ready.</div>
+  <button id="check">Check my rocket</button>
+  <button id="launch" disabled>🚀 Launch mission</button>
+  <button class="secondary" id="reset">Start again</button>
+ </section>
+ <section class="panel hidden" id="launchPanel">
+  <h2>5. Mission launch!</h2>
+  <div id="launchArea">
+   <div id="countdown">READY FOR LAUNCH</div>
+   <div class="planet"></div>
+   <div class="rocket" id="rocketIcon">🚀</div>
+   <div class="flame" id="flame">🔥</div>
+  </div>
+  <div id="launchMessage">Your rocket is waiting on the launchpad.</div>
+  <div id="finalResult" class="hidden"></div>
+ </section>
+</main>
+<footer>Rocket Quest • Educational game concept • Simplified model, not an official NASA simulator</footer>
+<script>
+const $=id=>document.getElementById(id);
+const rocketData={
+ small:{capacity:45,cost:20},medium:{capacity:90,cost:40},heavy:{capacity:160,cost:70}
+};
+const equipment={
+ camera:{mass:12,power:2,cost:10,points:20},
+ scanner:{mass:25,power:4,cost:18,points:30},
+ weather:{mass:10,power:2,cost:8,points:15}
+};
+function getDesign(){
+ const rocket=rocketData[$('rocket').value];
+ const chosen=[...document.querySelectorAll('.tool:checked')].map(x=>equipment[x.value]);
+ const mass=chosen.reduce((a,b)=>a+b.mass,0);
+ const power=chosen.reduce((a,b)=>a+b.power,0);
+ const cost=rocket.cost+chosen.reduce((a,b)=>a+b.cost,0)+($('power').value==='strong'?18:8);
+ const powerSupply=$('power').value==='strong'?9:5;
+ const science=chosen.reduce((a,b)=>a+b.points,0);
+ return {rocket,chosen,mass,power,cost,powerSupply,science};
+}
+function check(){
+ const d=getDesign(), beginner=$('level').value==='easy';
+ let problems=[];
+ if(d.mass>d.rocket.capacity)problems.push('Your equipment is too heavy for this rocket. Choose a bigger rocket or fewer instruments.');
+ if(d.power>d.powerSupply)problems.push('Your equipment needs more power. Choose large solar panels or remove an instrument.');
+ if(d.chosen.length===0)problems.push('Choose at least one science instrument.');
+ const ok=problems.length===0;
+ $('mass').textContent=d.mass+'/'+d.rocket.capacity;
+ $('watts').textContent=d.power+'/'+d.powerSupply;
+ $('cost').textContent=d.cost;
+ $('feedback').textContent=ok?'✅ Rocket ready! Your spacecraft fits the rocket and has enough power. You can launch!':'⚠️ '+problems.join(' ');
+ $('feedback').style.color=ok?'#9dffd0':'#ffe0a0';
+ $('launch').disabled=!ok;
+ return ok;
+}
+$('check').onclick=check;
+['rocket','power','mission','level'].forEach(id=>$(id).addEventListener('change',()=>{ $('launch').disabled=true;check();}));
+document.querySelectorAll('.tool').forEach(x=>x.addEventListener('change',()=>{ $('launch').disabled=true;check();}));
+$('launch').onclick=()=>{
+ if(!check())return;
+ const d=getDesign();
+ $('launchPanel').classList.remove('hidden');
+ $('launchPanel').scrollIntoView({behavior:'smooth'});
+ $('launchArea').style.display='block';
+ $('finalResult').classList.add('hidden');
+ const icon=$('rocketIcon'),flame=$('flame');
+ icon.classList.remove('fly');flame.classList.remove('burn');
+ void icon.offsetWidth;
+ $('countdown').textContent='3... 2... 1... IGNITION!';
+ $('launchMessage').textContent='Engines starting. Preparing for liftoff...';
+ setTimeout(()=>{icon.classList.add('fly');flame.classList.add('burn');$('countdown').textContent='LIFTOFF! 🚀';$('launchMessage').textContent='Your rocket is flying beyond Earth!';},900);
+ setTimeout(()=>{
+  flame.classList.remove('burn');
+  const mission=$('mission').value;
+  const destination={moon:'the Moon',earth:'Earth orbit',mars:'Mars'}[mission];
+  let bonus=mission==='moon'?10:mission==='mars'?15:8;
+  let score=Math.min(100,d.science+bonus);
+  $('countdown').textContent='MISSION COMPLETE';
+  $('launchMessage').textContent='🎉 Your spacecraft has reached '+destination+'!';
+  $('finalResult').classList.remove('hidden');
+  $('finalResult').innerHTML='<div id="feedback" style="background:#123c32;color:#d4ffed"><h3>🏆 Mission report</h3><p><b>Destination:</b> '+destination+'</p><p><b>Science score:</b> '+score+' points</p><p><b>Equipment:</b> '+d.chosen.length+' instrument(s)</p><p><b>Mission cost:</b> '+d.cost+' credits</p><p>Great work! You balanced your rocket capacity and power to complete the mission.</p></div>';
+ },6000);
+};
+$('reset').onclick=()=>location.reload();
+check();
+</script>
+</body>
+</html>
